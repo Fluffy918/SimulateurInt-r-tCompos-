@@ -13,6 +13,9 @@ document.getElementById('calculator').addEventListener('submit', function(e) {
     const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
     const months = years * 12;
 
+
+    let monthlyData = [];
+    let monthlyLabels = [];
     let capital = initial;
     
     for (let i = 0; i < months; i++) {
@@ -22,6 +25,9 @@ document.getElementById('calculator').addEventListener('submit', function(e) {
         if (capital < 0) {
             capital = 0; // éviter les valeurs négatives
         }
+
+        monthlyData.push(capital.toFixed(2));
+        monthlyLabels.push(`Mois ${i}`);
     }
 
     // On calcule les gains (intérêts) pour appliquer la fiscalité
@@ -37,12 +43,44 @@ document.getElementById('calculator').addEventListener('submit', function(e) {
     let data = [];
     let labels = [];
 
+    const tableBody = document.querySelector('#summaryTable tbody');
+    tableBody.innerHTML = '';
+
     for (let year = 1; year <= years; year++) {
         let m = year * 12;
         let value = initial * Math.pow(1 + rate, m) + monthly * ((Math.pow(1 + rate, m) - 1) / rate);
         data.push(parseFloat(value.toFixed(2)));
         labels.push(`${year} ans${year > 1 ? 's' : ''}`);
     }
+
+    let capitalYear = initial;
+
+    
+
+    for (let year = 1; year <= years; year++) {
+        let invested = initial + monthly * (year * 12);
+
+        for (let m = 1; m <= 12; m++) {
+            capitalYear *= 1 + rate;
+            capitalYear += monthly;
+            capitalYear -= withdrawal;
+            if (capitalYear < 0) capitalYear = 0;
+        }
+
+        const interest = capitalYear - invested;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+        <td>${year}</td>
+        <td>${invested.toFixed(2)} €</td>
+        <td>${capitalYear.toFixed(2)} €</td>
+        <td>${interest.toFixed(2)} €</td>
+        `;
+        tableBody.appendChild(row);
+    }
+
+    
+
     // Si le graphique existe déjà, le détruire
     if (chartInstance) {
         chartInstance.destroy();
@@ -52,10 +90,10 @@ document.getElementById('calculator').addEventListener('submit', function(e) {
     chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: monthlyLabels,
             datasets: [{
                 label: 'Croissance du capital (€)',
-                data: data,
+                data: monthlyData,
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 fill: true,

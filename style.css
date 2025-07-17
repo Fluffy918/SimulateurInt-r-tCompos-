@@ -62,3 +62,18 @@ button:hover {
     margin-top: 2rem;
     text-align: center;
 }
+
+#summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#summaryTable th, #summaryTable td {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+#summaryTable th {
+    background: #121212;
+}
